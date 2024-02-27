@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Display</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-yGBMQ8Y+VcS8HGrFZdqeL/Az0qiuKE0tKCf6xPJ0U5Jw1PPNVz1J5t3B3t4bSRNP" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script>
+        $(document).ready(function () {
+            function getData() {
+                $.ajax({
+                    url: '/getData',
+                    type: 'GET',
+                    success: function (response) {
+                        // Update image
+                        $('#original-image').attr('src', 'data:image/jpeg;base64,' + response.original_img);
+                        // $('#hsv-image').attr('src', 'data:image/jpeg;base64,' + response.img_hsv);
+                        $('#fire-status-cnn').addClass('txt1').text(response.fire_status_cnn);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            }
+
+
+
+            function getSensorData() {
+                $.ajax({
+                    url: '/getSensorData',
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response.data)
+                        // Update data
+                        $('#temp_read').addClass('txt1').html(`${response.temp}&deg;C`);
+                        $('#flame').addClass('txt1').html(`${response.flame}`);
+                        $('#humidity').addClass('txt1').text(response.humidity + '%');
+                        $('#gas').addClass('txt1').text(response.gas);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+                $(document).ready(function () {
+                    // Get the soil moisture value (replace this with your actual value)
+                    var temperature = parseInt($("#temp_read").text());
+                    console.log(temperature)
+                    // Calculate the rotation angle based on the soil moisture value
+                    var rotationAngle = (temperature / 100) * 180; // Adjust the multiplier as needed
+
+                    // Apply the rotation to the semi-circle mask
+                    $(".gauge--1 .semi-circle--mask").css("transform", "rotate(" + rotationAngle + "deg) translate3d(0, 0, 0)");
+                });
+                $(document).ready(function () {
+                    // Get the soil moisture value (replace this with your actual value)
+                    var humidity = parseInt($("#humidity").text());
+                    humidity = Math.max(0, Math.min(humidity, 100));
+
+                    // Calculate the rotation angle based on the soil moisture value
+                    var rotationAngle = (humidity / 100) * 180; // Adjust the multiplier as needed
+
+                    // Apply the rotation to the semi-circle mask
+                    $(".gauge--2 .semi-circle--mask").css("transform", "rotate(" + rotationAngle + "deg) translate3d(0, 0, 0)");
+                });
+                $(document).ready(function () {
+                    // Get the soil moisture value (replace this with your actual value)
+                    var flame = parseInt($("#flame").text()); // Extract the value from an element with ID "flame"
+                    flame = Math.max(0, Math.min(flame, 100)); // Ensure flame value is within range
+
+                    // Adjust the multiplier based on your requirement
+                    // The multiplier should be determined based on the range of possible values for "flame"
+                    // For example, if "flame" ranges from 0 to 100, the multiplier might be different compared to if it ranges from 0 to 1000.
+                    var rotationAngle = (flame / 100) * 180; // Adjusted based on the range of "flame" values
+                    console.log(`rotationAngle :${rotationAngle}`)
+                    // Apply the rotation to the semi-circle mask
+                    $(".gauge--3 .semi-circle--mask").css("transform", "rotate(" + rotationAngle + "deg) translate3d(0, 0, 0)");
+                });
+
+                $(document).ready(function () {
+                    // Get the soil moisture value (replace this with your actual value)
+                    var gas = parseInt($("#gas").text());
+                    gas = Math.max(0, Math.min(gas, 100));
+                    // Calculate the rotation angle based on the soil moisture value
+                    var rotationAngle = (gas / 100) * 180; // Adjust the multiplier as needed
+
+                    // Apply the rotation to the semi-circle mask
+                    $(".gauge--4 .semi-circle--mask").css("transform", "rotate(" + rotationAngle + "deg) translate3d(0, 0, 0)");
+                });
+
+            }
+
+            function getDecision() {
+                $.ajax({
+                    url: '/getDecision',
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response.flame_mode)
+                        $('#fire-status-mode-cnn').addClass('txt1').html(response.fire_cnn_mdoe);
+                        $('#temp_max').addClass('txt1').html(`${response.temp_max}&deg;C`);
+                        $('#humidity_max').addClass('txt1').html(response.humidity_max + '%');
+                        $('#flame_max').addClass('txt1').html(`${response.flame_max}`);
+                        $('#gas_max').addClass('txt1').html(response.gas_max);
+                        $('#fire-decide').addClass('txt1').html(response.fire_decision);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            }
+            // Fetch data every 1 second
+            setInterval(getData, 1000);
+            // Fetch integer data every 0.5 second
+            setInterval(getSensorData, 1000);
+
+            let intervalId;
+            intervalId = setInterval(function () {
+                getDecision();
+            }, 5000);
+
+            $('#btnOne').click(function (event) {
+                event.preventDefault();
+
+                // Clear the existing interval (if any)
+                $('#btnOne').hide();
+                $('#answer1').show();
+                command = `True`;
+                userControl(command);
+                if (typeof intervalId !== 'undefined') {
+                    // Log the current value of intervalId
+                    console.log("Current intervalId:", intervalId);
+
+                    // Clear the existing interval
+                    clearInterval(intervalId);
+                }
+                // Perform other tasks here
+                console.log("Other button clicked, performing other tasks");
+            });
+            $('#answer1').click(function (event) {
+                event.preventDefault();
+
+                // Perform tasks here if needed
+
+                // Toggle the visibility of the buttons
+                $('#answer1').hide();
+                $('#btnOne').show();
+                intervalId = setInterval(function () {
+                    getDecision();
+                }, 5000);
+                command = `False`;
+                userControl(command);
+
+            });
+            function userControl(command) {
+                const url = "/userCommand";
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: { command: command }, // Ensure the name matches the HTML form
+                    success: function (response) {
+                        // Handle success if needed
+                        console.log(`Response: ${response.command}`);
+                        console.log(`Response: ${response.message}`);
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        .title {
+            color: #12ea27;
+            font-family: 'Raleway', sans-serif;
+            font-size: 50px;
+            font-weight: 300;
+            line-height: 72px;
+            margin: 0 0 24px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .background-image {
+            background-image: url('static/images/fire_bg.jpg');
+            background-size: cover;
+            /* Adjust as needed */
+            background-position: center;
+            /* Adjust as needed */
+            height: 100%;
+            /* Adjust as needed */
+            /* Additional styles */
+        }
+
+
+
+        .image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .image-container img {
+            width: 400px;
+            height: 400px;
+            margin: 0;
+            margin-right: 20px;
+            margin-left: 200px;
+            margin-bottom: 30px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-container .text-container {
+            position: absolute;
+            top: 12%;
+            left:650px;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .image-container .text-container-second {
+            position: absolute;
+            top: 60%;
+            left: 650px;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .img:hover {
+            transform: scale(1.05);
+        }
+
+
+        .mask {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            width: 12.5rem;
+            height: 6.25rem;
+            margin: 1.25rem;
+        }
+
+        .semi-circle {
+            position: relative;
+            display: block;
+            width: 12.5rem;
+            height: 6.25rem;
+            background: linear-gradient(to right, #3498db 0%, #05b027 33%, #f1c40f 70%, #c0392b 100%);
+            border-radius: 50% 50% 50% 50% / 100% 100% 0% 0%;
+        }
+
+
+        .semi-circle::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            z-index: 2;
+            display: block;
+            width: 8.75rem;
+            height: 4.375rem;
+            margin-left: -4.375rem;
+            background:rgba(255, 255, 255, 0.2);
+            border-radius: 50% 50% 50% 50% / 100% 100% 0% 0%;
+        }
+
+        .semi-circle--mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 12.5rem;
+            height: 12.5rem;
+            background: transparent;
+            transform: rotate(120deg) translate3d(0, 0, 0);
+            transform-origin: center center;
+            backface-visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .semi-circle--mask::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0%;
+            z-index: 2;
+            display: block;
+            width: 12.625rem;
+            height: 6.375rem;
+            margin: -1px 0 0 -1px;
+            background:rgba(255, 255, 255, 0.2);
+            border-radius: 50% 50% 50% 50% / 100% 100% 0% 0%;
+        }
+
+        .gauge--1 .semi-circle {
+            background: #3498db;
+        }
+
+        .gauge--1 .semi-circle--mask {
+            transform: rotate(0deg) translate3d(0, 0, 0);
+        }
+
+        .gauge--2 .semi-circle {
+            background: #3498db;
+        }
+
+        .gauge--2 .semi-circle--mask {
+            transform: rotate(0deg) translate3d(0, 0, 0);
+        }
+
+        .gauge--3 .semi-circle {
+            background: #3498db;
+        }
+
+        .gauge--3 .semi-circle--mask {
+            transform: rotate(0deg) translate3d(0, 0, 0);
+        }
+
+        .gauge--4 .semi-circle {
+            background: #3498db;
+        }
+
+        .gauge--4 .semi-circle--mask {
+            transform: rotate(0deg) translate3d(0, 0, 0);
+        }
+
+        .title {
+            margin: 0 auto;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .txt{
+            color: rgb(241, 255, 240);
+        }
+        .txt1{
+            color: #12ea27;
+        }
+
+        .fire_status {
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="background-image">
+        <h1 class="title"><u>Cloud Based Fire Protection and Monitoring System Using Machine Learning</u></h1>
+        <div class="image-container">
+            <img class="img" id="original-image" src="" alt="Firebase Image">
+            <div class="text-container">
+                <h4 class="txt"><u>Current</u></h4>
+                <p class="txt">Fire Status with CNN : <strong id="fire-status-cnn"></strong></p>
+            </div>
+            <div class="text-container-second">
+                <h4 class="txt"><u>After 10 second</u></h4>
+                <p class="txt" >Flame Max : <strong id="flame_max"></strong></p>
+                <p class="txt" >Gas Max : <strong id="gas_max"></strong></p>
+                <p class="txt" >Temperature Max : <strong id="temp_max"></strong></p>
+                <p class="txt" >Humidity Max : <strong id="humidity_max"></strong></p>
+                <p class="txt" >Fire Status Mode with CNN after 10s: <strong id="fire-status-mode-cnn"></strong></p>
+                <p class="txt" >Final Decision : <strong id="fire-decide"></strong></p>
+            </div>
+        </div>
+      
+
+        <div class="container-fluid ">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-sm-3 border border-success pt-4">
+                        <div class="box gauge--1">
+                            <h4 class="txt">Current</h4>
+                            <hr class="border border-success">
+                            <br>
+                            <div class="mask">
+                                <div class="semi-circle"></div>
+                                <div class="semi-circle--mask"></div>
+                            </div>
+                            <p style="font-size: 30px;" id="temp_read">0</p>
+                            <table cellspacing="5" cellpadding="5">
+                                <tr>
+                                    <th colspan="3" class="txt">Temperature</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 border border-success pt-4">
+                        <div class="box gauge--2">
+                            <h4 class="txt">Current</h4>
+                            <hr class="border border-success">
+                            <br>
+                            <div class="mask">
+                                <div class="semi-circle"></div>
+                                <div class="semi-circle--mask"></div>
+                            </div>
+                            <p style="font-size: 30px;" id="humidity">0</p>
+                            <table cellspacing="5" cellpadding="5">
+                                <tr>
+                                    <th colspan="3" class="txt">Humidity</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 border border-success pt-4">
+                        <div class="box gauge--3">
+                            <h4 class="txt">Current</h4>
+                            <hr class="border border-success">
+                            <br>
+                            <div class="mask">
+                                <div class="semi-circle"></div>
+                                <div class="semi-circle--mask"></div>
+                            </div>
+                            <p style="font-size: 30px;" id="flame">0</p>
+                            <table cellspacing="5" cellpadding="5">
+                                <tr>
+                                    <th colspan="3" class="txt">Flame</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 border border-success pt-4">
+                        <div class="box gauge--4">
+                            <h4 class="txt">Current</h4>
+                            <hr class="border border-success">
+                            <br>
+                            <div class="mask">
+                                <div class="semi-circle"></div>
+                                <div class="semi-circle--mask"></div>
+                            </div>
+                            <p style="font-size: 30px;" id="gas">0</p>
+                            <table cellspacing="5" cellpadding="5">
+                                <tr>
+                                    <th colspan="3" class="txt">Gas</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+                <div class="">
+                 <div style="margin-bottom: 10px;"></div>
+                    <h5 class="txt">Water Pump Status : <span id="countdown" class="text-success"></span></h5>
+                    <br>
+                    <button id="btnOne" style="display: block;"
+                        class="btn btn-success btn-sm btn-block mb-2">On</button>
+                    <button id="answer1" style="display: none;"
+                        class="btn btn-danger btn-sm btn-block mb-2">Off</button>
+                </div>
+                <script>
+                    $('#btnOne').click(function (event) {
+                        event.preventDefault();
+
+                        // Clear the existing interval (if any)
+                        $('#btnOne').hide();
+                        $('#answer1').show();
+                        command = `True`;
+                        userControl(command);
+                        if (typeof intervalId !== 'undefined') {
+                            // Log the current value of intervalId
+                            console.log("Current intervalId:", intervalId);
+
+                            // Clear the existing interval
+                            clearInterval(intervalId);
+                        }
+                        // Perform other tasks here
+                        console.log("Other button clicked, performing other tasks");
+                    });
+                    $('#answer1').click(function (event) {
+                        event.preventDefault();
+
+                        // Perform tasks here if needed
+
+                        // Toggle the visibility of the buttons
+                        $('#answer1').hide();
+                        $('#btnOne').show();
+                        if (typeof intervalId !== 'undefined') {
+                            // Log the current value of intervalId
+                            console.log("Current intervalId:", intervalId);
+
+                            // Clear the existing interval
+                            clearInterval(intervalId);
+                        }
+                        command = `False`;
+                        userControl(command);
+
+                    });
+                    function userControl(command) {
+                        const url = "/userCommand";
+                        $.ajax({
+                            type: "POST",
+                            url: url,
+                            data: { command: command }, // Ensure the name matches the HTML form
+                            success: function (response) {
+                                // Handle success if needed
+                                console.log(`Response: ${response.command}`);
+                                console.log(`Response: ${response.message}`);
+                            },
+                            error: function (error) {
+                                console.error("Error:", error);
+                            }
+                        });
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- <p id="data"></p>
+    
+    <p id="temperature"></p>
+    <p id="humidity"></p> -->
+</body>
+
+</html>
